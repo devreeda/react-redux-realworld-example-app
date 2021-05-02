@@ -1,74 +1,187 @@
-# ![React + Redux Example App](project-logo.png)
+# PROJET WE
 
-[![RealWorld Frontend](https://img.shields.io/badge/realworld-frontend-%23783578.svg)](http://realworld.io)
+> Auteur : Rida GHOUTI TERKI
 
-> ### React + Redux codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld-example-apps) spec and API.
+## Introduction
 
-<a href="https://stackblitz.com/edit/react-redux-realworld" target="_blank"><img width="187" src="https://github.com/gothinkster/realworld/blob/master/media/edit_on_blitz.png?raw=true" /></a>&nbsp;&nbsp;<a href="https://thinkster.io/tutorials/build-a-real-world-react-redux-application" target="_blank"><img width="384" src="https://raw.githubusercontent.com/gothinkster/realworld/master/media/learn-btn-hr.png" /></a>
+Ce projet part de l'application Conduit, un clone open source de la plateforme Medium qui permet à ses utilisateurs d'écrire des articles sur divers sujets. J'ai choisi de partir de l'implémentation déjà existante [React + Redux](https://github.com/khaledosman/react-redux-realworld-example-app) qui comme son nom l'indique est l'équivalent React de l'application. Redux servira à partager les données au sein de l'application (elles sont accessibles peu importe la page où l'on se situe).
 
-### [Demo](https://react-redux.realworld.io)&nbsp;&nbsp;&nbsp;&nbsp;[RealWorld](https://github.com/gothinkster/realworld)
+## Lancer le programme
 
-Originally created for this [GH issue](https://github.com/reactjs/redux/issues/1353). The codebase is now feature complete; please submit bug fixes via pull requests & feedback via issues.
+Vous devez clone le projet dans le dossier de votre choix :
 
-We also have notes in [**our wiki**](https://github.com/gothinkster/react-redux-realworld-example-app/wiki) about how the various patterns used in this codebase and how they work (thanks [@thejmazz](https://github.com/thejmazz)!)
+```
+git clone https://github.com/devreeda/react-redux-realworld-example-app
+```
 
+Puis vous placer dans le dossier cloné :
 
-## Getting started
+```
+cd react-redux-realworld-example-app
+```
 
-You can view a live demo over at https://react-redux.realworld.io/
+Pour lancer le programme tapez les commandes suivantes :
 
-To get the frontend running locally:
+```
+npm install
+npm start
+```
 
-- Clone this repo
-- `npm install` to install all req'd dependencies
-- `npm start` to start the local server (this project uses create-react-app)
+## Ajout de fonctionnalité
 
-Local web server will use port 4100 instead of standard React's port 3000 to prevent conflicts with some backends like Node or Rails. You can configure port in scripts section of `package.json`: we use [cross-env](https://github.com/kentcdodds/cross-env) to set environment variable PORT for React scripts, this is Windows-compatible way of setting environment variables.
- 
-Alternatively, you can add `.env` file in the root folder of project to set environment variables (use PORT to change webserver's port). This file will be ignored by git, so it is suitable for API keys and other sensitive stuff. Refer to [dotenv](https://github.com/motdotla/dotenv) and [React](https://github.com/facebookincubator/create-react-app/blob/master/packages/react-scripts/template/README.md#adding-development-environment-variables-in-env) documentation for more details. Also, please remove setting variable via script section of `package.json` - `dotenv` never override variables if they are already set.  
+Mon apport à ce projet est l'ajout d'une liste de films, parallèlement à la liste d'articles préexistante. Pour cela j'ai fait appel à l'API [The Movie Database](https://www.themoviedb.org/?language=fr).
 
-### Making requests to the backend API
+### Récupération des données
 
-For convenience, we have a live API server running at https://conduit.productionready.io/api for the application to make requests against. You can view [the API spec here](https://github.com/GoThinkster/productionready/blob/master/api) which contains all routes & responses for the server.
+Pour récupérer les films, j'ai installé la librairie [axios](https://github.com/axios/axios) qui permet de fetch facilement les données à partir de l'url d'une API.
 
-The source code for the backend server (available for Node, Rails and Django) can be found in the [main RealWorld repo](https://github.com/gothinkster/realworld).
+`axios.js`
 
-If you want to change the API URL to a local server, start/build the app with the REACT_APP_BACKEND_URL environment variable pointing to the local server's URL (i.e. `REACT_APP_BACKEND_URL="http://localhost:3000/api" npm run build`)
+```javascript=
+import axios from "axios";
 
+/** base url to make requests to the movie database */
+const instance = axios.create({
+  baseURL: "https://api.themoviedb.org/3"
+});
 
-## Functionality overview
+export default instance;
+```
 
-The example application is a social blogging site (i.e. a Medium.com clone) called "Conduit". It uses a custom API for all requests, including authentication. You can view a live demo over at https://redux.productionready.io/
+La constante "instance" servira de base pour nos appels API, il faudra ensuite préciser le type de film que l'on souhaite et l'ajouter dans l'url.
+Les différents types de films se trouve dans le fichier `requests.js`
 
-**General functionality:**
+```javascript=
+const API_KEY = "**************************";
 
-- Authenticate users via JWT (login/signup pages + logout button on settings page)
-- CRU* users (sign up & settings page - no deleting required)
-- CRUD Articles
-- CR*D Comments on articles (no updating required)
-- GET and display paginated lists of articles
-- Favorite articles
-- Follow other users
+const requests = {
+  fetchTrending: `/trending/all/week?api_key=${API_KEY}&language=en-US`,
+  fetchNetflixOriginals: `/discover/tv?api_key=${API_KEY}&with_networks=213`,
+  fetchTopRated: `/movie/top_rated?api_key=${API_KEY}&language=en-US`,
+  fetchActionMovies: `/discover/movie?api_key=${API_KEY}&with_genres=28`,
+  fetchComedyMovies: `/discover/movie?api_key=${API_KEY}&with_genres=35`,
+  fetchHorrorMovies: `/discover/movie?api_key=${API_KEY}&with_genres=27`,
+  fetchRomanceMovies: `/discover/movie?api_key=${API_KEY}&with_genres=10749`,
+  fetchDocumentaries: `/discover/movie?api_key=${API_KEY}&with_genres=99`
+};
 
-**The general page breakdown looks like this:**
+export default requests;
+```
 
-- Home page (URL: /#/ )
-    - List of tags
-    - List of articles pulled from either Feed, Global, or by Tag
-    - Pagination for list of articles
-- Sign in/Sign up pages (URL: /#/login, /#/register )
-    - Use JWT (store the token in localStorage)
-- Settings page (URL: /#/settings )
-- Editor page to create/edit articles (URL: /#/editor, /#/editor/article-slug-here )
-- Article page (URL: /#/article/article-slug-here )
-    - Delete article button (only shown to article's author)
-    - Render markdown from server client side
-    - Comments section at bottom of page
-    - Delete comment button (only shown to comment's author)
-- Profile page (URL: /#/@username, /#/@username/favorites )
-    - Show basic user info
-    - List of articles populated from author's created articles or author's favorited articles
+### Ajout de la liste
 
-<br />
+Pour ajouter notre liste, il faut d'abord placer notre onglet qui permettra son accès en cliquant dessus. Pour cela, il faut se placer dans le fichier `MainView.js`.
+Nous allons ajouter notre onglet cliquable qui lorsque l'on clique dessus permet d'activer un boolean qui affiche ou non la liste de film.
+`MainView.js`
 
-[![Brought to you by Thinkster](https://raw.githubusercontent.com/gothinkster/realworld/master/media/end.png)](https://thinkster.io)
+```jsx=
+const MoviesFeedTab = React.memo(props => {
+  const clickHandler = ev => {
+    ev.preventDefault();
+    props.onTabClick("movies", agent.Articles.all, agent.Articles.all());
+    isMovieSelected = true;
+  };
+  return (
+    <li className="nav-item">
+      <button
+        type="button"
+        className={props.tab === "movies" ? "nav-link active" : "nav-link"}
+        onClick={clickHandler}
+      >
+        Movies
+      </button>
+    </li>
+  );
+});
+```
+
+Ensuite, on affiche la bonne liste en fonction du boolean :
+`MainView.js`
+
+```jsx=
+const returnList = props => {
+  if (isMovieSelected) {
+    return (
+      <FilmList
+        pager={props.pager}
+        articles={props.articles}
+        loading={props.loading}
+        articlesCount={props.articlesCount}
+        currentPage={props.currentPage}
+      />
+    );
+  } else {
+    return (
+      <ArticleList
+        pager={props.pager}
+        articles={props.articles}
+        loading={props.loading}
+        articlesCount={props.articlesCount}
+        currentPage={props.currentPage}
+      />
+    );
+  }
+};
+```
+
+### Contenu de la liste
+
+Nous allons ici importer notre constante `requests` qui va nous permettre de fetch la liste de notre choix. Une fois la liste récupérer, nous allons afficher les films de cette liste à travers le composant `FilmPreview` et nous allons lui passer en props son film correspondant pour qu'il puisse afficher ses informations.
+
+`FilmList.js`
+
+```jsx=
+const FilmList = React.memo(props => {
+  const [movies, setMovies] = useState([]);
+
+  // A snippet of code which runs based on a specific condition/variable
+  useEffect(() => {
+    // if [], run once when the row loads, and don't run again
+    async function fetchData() {
+      const request = await axios.get(requests.fetchTopRated);
+      setMovies(request.data.results);
+      return request;
+    }
+    fetchData();
+  }, [requests.fetchTopRated]);
+
+  if (!props.articles) {
+    return <div className="article-preview">Loading...</div>;
+  }
+
+  if (props.articles.length === 0) {
+    return <div className="article-preview">No film are here... yet.</div>;
+  }
+
+  return (
+    <div>
+      {movies.map(movie => {
+        return <FilmPreview movie={movie} key={movie.id} />;
+      })}
+    </div>
+  );
+});
+```
+
+### Affichage des items
+
+Enfin, dans `FilmPreview.js`, nous affichons le film avec son affiche, son titre et sa description. Ces informations nous sont fournies par l'api TMDB.
+
+`FilmPreview.js`
+
+```jsx=
+const { title, overview, backdrop_path } = props.movie;
+console.log(props.movie);
+return (
+  <div className="article-preview">
+    {/** UN ARTICLE DE LA LISTE */}
+    <img
+      src={`${base_url}${backdrop_path}`}
+      alt={title}
+      style={{ width: 800 }}
+    />
+    <h1>{title}</h1>
+    <p>{overview}</p>
+  </div>
+);
+```

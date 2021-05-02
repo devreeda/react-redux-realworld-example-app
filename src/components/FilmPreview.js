@@ -10,6 +10,8 @@ import {
 const FAVORITED_CLASS = "btn btn-sm btn-primary";
 const NOT_FAVORITED_CLASS = "btn btn-sm btn-outline-primary";
 
+const base_url = "https://image.tmdb.org/t/p/original/";
+
 const mapDispatchToProps = dispatch => ({
   favorite: slug =>
     dispatch({
@@ -39,15 +41,18 @@ const FilmPreview = React.memo(props => {
   };
 */
 
-  const { title, overview } = props.movie;
+  const { title, overview, backdrop_path } = props.movie;
+  console.log(props.movie);
   return (
     <div className="article-preview">
-      <Link to={`/article`} className="preview-link">
-        {/** UN ARTICLE DE LA LISTE */}
-        <h1>{title}</h1>
-        <p>{overview}</p>
-        <span>Read more...</span>
-      </Link>
+      {/** UN ARTICLE DE LA LISTE */}
+      <img
+        src={`${base_url}${backdrop_path}`}
+        alt={title}
+        style={{ width: 800 }}
+      />
+      <h1>{title}</h1>
+      <p>{overview}</p>
     </div>
   );
 });

@@ -25,7 +25,7 @@ const FilmList = React.memo(props => {
   }
 
   if (props.articles.length === 0) {
-    return <div className="article-preview">No articles are here... yet.</div>;
+    return <div className="article-preview">No film are here... yet.</div>;
   }
 
   return (
@@ -33,12 +33,6 @@ const FilmList = React.memo(props => {
       {movies.map(movie => {
         return <FilmPreview movie={movie} key={movie.id} />;
       })}
-
-      <ListPagination
-        pager={props.pager}
-        articlesCount={props.articlesCount}
-        currentPage={props.currentPage}
-      />
     </div>
   );
 });
